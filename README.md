@@ -1,6 +1,6 @@
 # Guion · Sistema de Gestión Cielo Abierto
 
-Página de presentador para el speech de 8 minutos de la carpeta de Práctica Profesionalizante I ("Sistema de Gestión Cielo Abierto", división 31N).
+Página de presentador para el speech de 10:40 de la carpeta de Práctica Profesionalizante I ("Sistema de Gestión Cielo Abierto", división 31N).
 
 Es un solo `index.html`, sin build y sin dependencias: se abre con doble clic y funciona sin internet. Los cuatro diagramas (hechos con archify) están incrustados en la página.
 

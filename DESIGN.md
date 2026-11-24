@@ -1,6 +1,6 @@
 ---
 name: Guion · Sistema de Gestión Cielo Abierto
-description: A private dark presenter view that keeps one speaker on text and on pace through an 8:00 talk.
+description: A private dark presenter view that keeps one speaker on text and on pace through a timed talk (10:40).
 colors:
   ground: "#0d1218"
   raise: "#141b23"
@@ -212,7 +212,7 @@ A cool blue-black instrument palette with three signal hues reserved for time an
 
 ### Hierarchy
 - **Display** (700, clamp(42px, 4vw, 60px), 1): the total clock only. It is the largest numeral on the page.
-- **Headline** (650, clamp(30px, 2.6vw, 38px), 1): the part clock. Plan suffixes ("/ 8:00", "/ 1:20") drop to 500 at clamp(17px, 1.5vw, 22px) in Muted Ink.
+- **Headline** (650, clamp(30px, 2.6vw, 38px), 1): the part clock. Plan suffixes ("/ 10:40" (computed from the speech), "/ 1:20") drop to 500 at clamp(17px, 1.5vw, 22px) in Muted Ink.
 - **Title** (650, clamp(28px, 2.4vw, 36px), 1.15): view titles; section heads in the full script at 26px; the bar's part title at clamp(17px, 1.35vw, 20px).
 - **Reading** (400, clamp(24px, calc(1.4vw + 6px), 30px), 1.42, paragraph gap .55em, max 34em): the spoken words in Presentar. The speaker can step it with + / − in 2px increments, clamped to 20–36px. The full script reads at 22px; Q&A answers at clamp(21px, 1.6vw, 24px).
 - **Body** (400, 15–16px, 1.5): meta lines, the "Sigue:" note, captions, practice table (17px).
@@ -262,7 +262,7 @@ Softly rounded rectangles throughout, with radius growing with the size of the s
 - **State:** the pressed segment fills Selected Slate with white text and the pressed-segment shadow; hover lifts text to ink.
 
 ### Clocks (signature component)
-- **Total clock:** label "Total", Display numerals, plan suffix "/ 8:00". Transparent at rest; when over time it gains an Over-Time Red border, the 8px hatch and "Excedido +m:ss" in Over Text.
+- **Total clock:** label "Total", Display numerals, plan suffix computed from the speech ("/ 10:40"). Transparent at rest; when over time it gains an Over-Time Red border, the 8px hatch and "Excedido +m:ss" in Over Text.
 - **Part clock:** label "Esta parte", Headline numerals, plan suffix, a state line. Raised Slate panel with hairline. On pace: Pace Green Edge border, green numerals, "Quedan m:ss". Last 15 s: amber border on Amber Wash, amber numerals. Over: red border, hatch, Over Text, "Excedido +m:ss". Idle: muted "Sin empezar". Background and border transition over 0.3s on the expo-out ease.
 
 ### Progress line

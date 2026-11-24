@@ -16,7 +16,7 @@ One person: Jordy Huansi, presenting alone the Práctica Profesionalizante I fol
 
 ## Product Purpose
 
-Turn the 8-minute speech (`C:\Users\usuario\Downloads\speech.md`) into a presenter tool: show one part at a time in large text, keep the pace against the planned times, cue what to show on the projector, and keep the likely jury questions at hand. Success: he finishes within 8:00, never loses his place, and never needs to scroll or hunt mid-sentence.
+Turn the speech (10:40 since the scope and requirements were detailed; originally 8:00) (`C:\Users\usuario\Downloads\speech.md`) into a presenter tool: show one part at a time in large text, keep the pace against the planned times, cue what to show on the projector, and keep the likely jury questions at hand. Success: he finishes within the planned total (10:40), never loses his place, and never needs to scroll or hunt mid-sentence.
 
 ## Positioning
 
@@ -24,7 +24,7 @@ A prompter built around this one speech and its six timed parts, not a generic s
 
 ## Operating Context
 
-- Six parts with fixed starts and durations: 1:20, 1:20, 1:30, 1:20, 1:20, 1:10 (total 8:00), then "Preguntas probables del jurado".
+- Six parts with fixed starts and durations: 1:20, 1:20, 1:30, 2:30, 2:50, 1:10 (total 10:40; parts 4 and 5 were extended to detail requirements, limits and scope), then "Preguntas probables del jurado".
 - Lines in [brackets] are projector cues, not spoken. Lines {Diagrama: …} mark where each diagram goes.
 - Keyboard only (no clicker): Space start/pause, ← → change part, F fullscreen, R reset.
 - Two uses: live presentation (presenter mode) and rehearsal (practice view measuring time per part, full-script view).
@@ -32,7 +32,7 @@ A prompter built around this one speech and its six timed parts, not a generic s
 
 ## Capabilities and Constraints
 
-- FIXED RULE: not one word of the spoken text, the questions or the answers may change. Only presentation changes.
+- FIXED RULE: not one word of the spoken text, the questions or the answers may change unless the user rewrites the speech itself (they did once, on 2026-11-24, to detail requirements, limits and scope). Presentation work never edits the text.
 - Four diagrams from archify, in Spanish, light mode: Estructura (tree), Recorrido del NNA (workflow), Antes y después (dataflow), Módulos (architecture). They use only facts present in speech.md.
 - Spoken text minimum 20px.
 - Motion must stop under `prefers-reduced-motion`.
