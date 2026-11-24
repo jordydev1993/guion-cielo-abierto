@@ -14,6 +14,7 @@ Es un solo `index.html`, sin build y sin dependencias: se abre con doble clic y 
 | + − | Tamaño del texto |
 | F | Pantalla completa |
 | R (dos veces) | Reiniciar los cronómetros |
+| Clic en un diagrama | Ampliarlo: rueda o + − para acercar, arrastrar para moverse, 0 ajusta, Esc cierra |
 
 Vistas: **Presentar** (una parte por vez, con cronómetro total y por parte), **Guion completo** y **Práctica** (tiempo medido contra el planificado, con ensayos guardados). La parte y el tiempo se guardan en el navegador, así que una recarga no pierde el avance.
 

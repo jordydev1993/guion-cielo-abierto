@@ -108,7 +108,20 @@ kbd{font-family:inherit;font-size:.85em;font-weight:700;border:1px solid var(--l
 figure.diagram{margin:8px 0 0;max-width:820px}
 .stage > figure.diagram.wide{grid-column:1 / -1;max-width:none;margin-top:0}
 .plate{background:var(--plate);border-radius:14px;padding:clamp(14px,2vw,24px);box-shadow:0 2px 6px rgba(0,0,0,.35),0 14px 40px rgba(0,0,0,.35)}
-figure.diagram figcaption{font-size:14.5px;color:var(--mute);margin-top:10px}
+figure.diagram figcaption{font-size:14.5px;color:var(--mute);margin-top:10px;display:flex;gap:12px;align-items:baseline;justify-content:space-between}
+.zbtn{display:inline-flex;align-items:center;gap:6px;flex:none;border:1px solid var(--line-2);background:var(--raise);color:var(--ink-2);border-radius:8px;padding:5px 10px;font-size:13.5px;font-weight:650;cursor:pointer}
+.zbtn:hover{background:var(--raise-2);color:var(--ink)}
+.zbtn svg{width:16px;height:16px}
+figure.diagram .plate{cursor:zoom-in}
+.zoom{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;background:rgba(9,13,18,.94)}
+.zoom.open{display:flex}
+.zbar{display:flex;align-items:center;gap:8px;padding:12px clamp(16px,2.4vw,32px);border-bottom:1px solid var(--line)}
+.zbar .zt{flex:1;min-width:0;font-weight:650;font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zbar .zp{min-width:58px;text-align:center;font-size:14px;color:var(--ink-2)}
+.zview{position:relative;flex:1;overflow:hidden;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.zview.drag{cursor:grabbing}
+.zinner{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--plate);border-radius:12px;padding:20px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.zhelp{padding:8px 16px 12px;text-align:center;font-size:13.5px;color:var(--mute)}
 .diagram-host{display:block}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 figure.diagram.enter .plate{animation:rise .5s var(--ease) .12s both}
@@ -187,6 +200,10 @@ table.ptab{width:100%;border-collapse:collapse;font-size:17px}
   <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
   <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/></symbol>
 </svg>
 
@@ -232,7 +249,20 @@ table.ptab{width:100%;border-collapse:collapse;font-size:17px}
   <span><kbd>R</kbd> dos veces: reiniciar</span>
   <span><kbd>↑</kbd> <kbd>↓</kbd> párrafo anterior o siguiente</span>
   <span><kbd>+</kbd> <kbd>−</kbd> tamaño del texto</span>
+  <span>clic en un diagrama: ampliar</span>
 </footer>
+<div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
+  <div class="zbar">
+    <div class="zt" id="zoomTitle"></div>
+    <button type="button" class="btn icon" data-z="out" aria-label="Alejar" title="Alejar (−)"><svg class="i"><use href="#i-minus"/></svg></button>
+    <span class="zp num" id="zoomPct">100%</span>
+    <button type="button" class="btn icon" data-z="in" aria-label="Acercar" title="Acercar (+)"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button type="button" class="btn" data-z="fit" title="Ajustar a la pantalla (0)">Ajustar</button>
+    <button type="button" class="btn" data-z="close" title="Cerrar (Esc)"><svg class="i"><use href="#i-close"/></svg>Cerrar</button>
+  </div>
+  <div class="zview" id="zoomView"><div class="zinner" id="zoomInner"><div class="diagram-host" id="zoomHost"></div></div></div>
+  <div class="zhelp">Rueda o <kbd>+</kbd> <kbd>−</kbd> para acercar · arrastrá para moverte · doble clic acerca · <kbd>0</kbd> ajusta · <kbd>Esc</kbd> cierra</div>
+</div>
 <div class="more" id="more" aria-hidden="true"><span>Sigue abajo <kbd>↓</kbd></span></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -4917,8 +4947,46 @@ const blockHtml = (b, withDiagram) => {
   return '';
 };
 const ratioOf = (k) => { const t = document.getElementById('svg-' + k); const m = t && /viewBox="0 0 ([0-9.]+) ([0-9.]+)"/.exec(t.innerHTML); return m ? m[1] / m[2] : 1; };
-const diagramHtml = (b, enter, inStage) => `<figure class="diagram${enter ? ' enter' : ''}${inStage && ratioOf(b.key) > 1.8 ? ' wide' : ''}"><div class="plate"><div class="diagram-host" data-svg="${b.key}"></div></div><figcaption>${b.h.replace(/^Diagrama: /, '')}</figcaption></figure>`;
+const diagramHtml = (b, enter, inStage) => `<figure class="diagram${enter ? ' enter' : ''}${inStage && ratioOf(b.key) > 1.8 ? ' wide' : ''}"><div class="plate"><div class="diagram-host" data-svg="${b.key}"></div></div><figcaption><span>${b.h.replace(/^Diagrama: /, '')}</span><button type="button" class="zbtn" data-zoom="${b.key}">${icon('zoom')}Ampliar</button></figcaption></figure>`;
 const SHADOW_CSS = ':host{display:block}svg{display:block;width:100%!important;height:auto!important;max-height:var(--dmax,62vh);min-width:0!important}svg *{animation:none!important}';
+// ── zoom de diagramas ────────────────────
+const zoomEl = document.getElementById('zoom'), zView = document.getElementById('zoomView'), zInner = document.getElementById('zoomInner');
+let zs = 1, zx = 0, zy = 0, zFit = 1, zW = 0, zH = 0, zLastFocus = null;
+const zApply = () => { zInner.style.transform = `translate(${zx}px,${zy}px) scale(${zs})`; document.getElementById('zoomPct').textContent = Math.round(zs / zFit * 100) + '%'; };
+function zClamp() {
+  const vw = zView.clientWidth, vh = zView.clientHeight, w = zW * zs, h = zH * zs, m = 40;
+  zx = w <= vw ? (vw - w) / 2 : Math.min(m, Math.max(vw - w - m, zx));
+  zy = h <= vh ? (vh - h) / 2 : Math.min(m, Math.max(vh - h - m, zy));
+}
+function zFitView() { const vw = zView.clientWidth - 48, vh = zView.clientHeight - 48; zFit = Math.min(vw / zW, vh / zH); zs = zFit; zClamp(); zApply(); }
+function zAt(f, cx, cy) {
+  const r = zView.getBoundingClientRect(); if (cx == null) { cx = r.width / 2; cy = r.height / 2; } else { cx -= r.left; cy -= r.top; }
+  const ns = Math.min(Math.max(zs * f, zFit * 0.5), zFit * 6); const k = ns / zs;
+  zx = cx - (cx - zx) * k; zy = cy - (cy - zy) * k; zs = ns; zClamp(); zApply();
+}
+function openZoom(key) {
+  const t = document.getElementById('svg-' + key); if (!t) return;
+  const old = document.getElementById('zoomHost'); const host = document.createElement('div'); host.className = 'diagram-host'; host.id = 'zoomHost'; old.replaceWith(host);
+  const sr = host.attachShadow({ mode: 'open' }); sr.innerHTML = '<style>:host{display:block}svg{display:block;width:100%!important;height:100%!important;min-width:0!important;user-select:none}svg *{animation:none!important}</style>' + t.innerHTML;
+  const m = /viewBox="0 0 ([0-9.]+) ([0-9.]+)"/.exec(t.innerHTML); const bw = m ? +m[1] : 800, bh = m ? +m[2] : 500;
+  const base = 900 / Math.max(bw, bh); host.style.width = (bw * base) + 'px'; host.style.height = (bh * base) + 'px';
+  const cap = document.querySelector(`[data-zoom="${key}"]`); document.getElementById('zoomTitle').textContent = cap ? cap.previousElementSibling.textContent : '';
+  zLastFocus = document.activeElement; zoomEl.classList.add('open'); document.body.style.overflow = 'hidden';
+  zW = zInner.offsetWidth; zH = zInner.offsetHeight; zx = zy = 0; zFitView();
+  zoomEl.querySelector('[data-z="close"]').focus();
+}
+function closeZoom() { zoomEl.classList.remove('open'); document.body.style.overflow = ''; if (zLastFocus && zLastFocus.focus) zLastFocus.focus(); }
+const zoomOpen = () => zoomEl.classList.contains('open');
+zView.addEventListener('wheel', (e) => { e.preventDefault(); zAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY); }, { passive: false });
+zView.addEventListener('dblclick', (e) => zAt(1.6, e.clientX, e.clientY));
+let zDrag = null;
+zView.addEventListener('pointerdown', (e) => { e.preventDefault(); window.getSelection().removeAllRanges(); zDrag = { x: e.clientX - zx, y: e.clientY - zy }; zView.setPointerCapture(e.pointerId); zView.classList.add('drag'); });
+zView.addEventListener('pointermove', (e) => { if (!zDrag) return; zx = e.clientX - zDrag.x; zy = e.clientY - zDrag.y; zClamp(); zApply(); });
+const zEnd = () => { zDrag = null; zView.classList.remove('drag'); };
+zView.addEventListener('pointerup', zEnd); zView.addEventListener('pointercancel', zEnd);
+zoomEl.addEventListener('click', (e) => { const b = e.target.closest('[data-z]'); if (!b) return; const a = b.dataset.z;
+  if (a === 'in') zAt(1.3); else if (a === 'out') zAt(1 / 1.3); else if (a === 'fit') zFitView(); else closeZoom(); });
+window.addEventListener('resize', () => { if (zoomOpen()) zFitView(); });
 const mountDiagrams = (root) => root.querySelectorAll('.diagram-host[data-svg]').forEach((h) => {
   if (h.shadowRoot) return; const t = document.getElementById('svg-' + h.dataset.svg); if (!t) return;
   const sr = h.attachShadow({ mode: 'open' }); sr.innerHTML = `<style>${SHADOW_CSS}</style>` + t.innerHTML;
@@ -5047,6 +5115,7 @@ function setRunning(v) {
   save(); paint();
 }
 function go(i, opts = {}) {
+  if (zoomOpen()) closeZoom();
   i = Math.min(Math.max(i, 0), Q);
   if (running) tick();
   const changed = i !== st.current; st.current = i; save(); whereText();
@@ -5082,6 +5151,8 @@ prog.addEventListener('click', (e) => { const b = e.target.closest('.step'); if 
 document.querySelectorAll('[data-mode-btn]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.modeBtn)));
 document.addEventListener('click', (e) => {
   const g = e.target.closest('[data-go]'); if (g) { setMode('present'); go(+g.dataset.go); return; }
+  const zb = e.target.closest('[data-zoom]'); if (zb) { openZoom(zb.dataset.zoom); return; }
+  const pl = e.target.closest('figure.diagram .plate'); if (pl) { const h = pl.querySelector('[data-svg]'); if (h) openZoom(h.dataset.svg); return; }
   const qa = e.target.closest('[data-qa]'); if (qa) { qa.closest('.qa').querySelectorAll('details').forEach((d) => d.open = qa.dataset.qa === 'open'); return; }
   if (e.target.closest('#saveRun')) { if (!totalMs()) { toast('Todavía no hay tiempos para guardar'); return; } const h = loadHist(); h.unshift({ at: Date.now(), parts: st.elapsed.slice(0, N) }); try { localStorage.setItem(HIST, JSON.stringify(h.slice(0, 20))); } catch (er) {} renderPractice(); toast('Ensayo guardado'); return; }
   if (e.target.closest('#resetRun')) { resetArm = Date.now(); askReset(); }
@@ -5089,6 +5160,15 @@ document.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key;
+  if (zoomOpen()) {
+    if (k === 'Escape') { e.preventDefault(); closeZoom(); return; }
+    if (k === '+' || k === '=') { e.preventDefault(); zAt(1.3); return; }
+    if (k === '-' || k === '_') { e.preventDefault(); zAt(1 / 1.3); return; }
+    if (k === '0') { e.preventDefault(); zFitView(); return; }
+    const pan = { ArrowLeft: [80, 0], ArrowRight: [-80, 0], ArrowUp: [0, 80], ArrowDown: [0, -80] }[k];
+    if (pan) { e.preventDefault(); zx += pan[0]; zy += pan[1]; zClamp(); zApply(); return; }
+    if (k === 'Tab') { const f = [...zoomEl.querySelectorAll('button')]; const i = f.indexOf(document.activeElement); e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus(); return; }
+  }
   if (k === ' ' || e.code === 'Space') { e.preventDefault(); setRunning(!running); return; }
   if (k === 'ArrowRight') { e.preventDefault(); go(st.current + 1); return; }
   if (k === 'ArrowLeft') { e.preventDefault(); go(st.current - 1); return; }
